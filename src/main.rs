@@ -89,52 +89,17 @@ impl fmt::Display for CharPrime {
     }
 }
 
-fn read_lines<P>(filename: P) -> std::io::Result<std::io::Lines<std::io::BufReader<std::fs::File>>>
-where P: AsRef<std::path::Path>, {
-    let file = std::fs::File::open(filename)?;
-    Ok(std::io::BufReader::new(file).lines())
-}
-
-fn mersenne31_fold(acc:u64, suc:u64) -> u64 {
-    let mut result = acc * suc;
-    result ^= result << 31;
-    result &= 0x7fffffff;
-    result
-}
-
-fn hash_anagram(word:&str) -> u64 {
-    let mut acc:u64 = 1;
-    for c in word.chars() {
-        acc = mersenne31_fold(acc, c as u64);
-    }
-    acc + word.len() as u64
-    // let hash:u64 = word.len() as u64;
-    // hash
-}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
-    let hash_match = hash_anagram(&args.letters);
-    let mut best = HashMap::<char, u64>::new();
     let letters = Word12::new(&args.letters.to_uppercase());
     let target = CharPrime::new(&args.letters.to_uppercase());
-    let filename = "WOW24.txt";
-    // Approach #1 - include wordlist in crate
-    // let wow = include_str!(filename);
-    // let f = BufReader::new(wow);
-    // let f = BufReader::new(std::fs::File::open(filename).expect("open failed"));
-    // for word in f.lines() {
-        // match word {
-            // Err(why) => panic!("couldn't read: {}", why),
-            // Ok(word) => println!("{:}", &word),
-        // }
-    // }
+    static WORDLIST:&str = include_str!("../share/WOW24.txt");
 
-    // Approach #2 - fast and simple
-
-    // let reader = BufReader::new(content.as_bytes());
-    let reader = BufReader::new(std::fs::File::open(filename).expect("open failed"));
+    let reader = BufReader::new(WORDLIST.as_bytes());
+    // let filename = "WOW24.txt";
+    // let reader = BufReader::new(std::fs::File::open(filename).expect("open failed"));
 
     let matches = reader
         .lines()
@@ -146,37 +111,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
 
-    // if let Ok(lines) = read_lines(filename) {
-        // for line in lines.flatten() {
-            // println!("{}", &line);
-            // let mut char_counts = HashMap::<char, u64>::new();
-            // for ch in line.chars() {
-                // char_counts.entry(ch).and_modify(|counter| *counter += 1).or_insert(1);
-            // }
-            // println!("{:?}", char_counts);
-            // println!("{:}", CharPrime::new(&line));
-            // for (key, value) in char_counts.into_iter() {
-                // let _ = *best.entry(key).and_modify(|max| *max = std::cmp::max(*max, value)).or_insert(value);
-            // }
-            // if hash_match == hash_anagram(&line) {
-                // println!("{}", line);
-            // }
-        // }
-    // }
-    // println!("{:?}", best);
 
 
     println!("letters {:?}", args.letters);
     println!("{}", letters);
     println!("{:?}", letters);
 
-    // let v:Vec<u8> = (0..12).map(|ii| (((A>>(5*ii)) & 31) + 64) as u8)
-        // .take_while(|x| *x > 64 )
-        // .collect(); 
-    // let s = String::from_utf8(v).expect("Found invalid UTF-8");
-    // let n = &args.letters.length();
-    // let ss = (0..n).map(|ii| (((A>>(5*ii)) & 31) + 64) as u8)
-        // .take_while(|x| *x > 64 )
-        // .collect::<Vec<u8>>().as_str();
     Ok(())
 }
