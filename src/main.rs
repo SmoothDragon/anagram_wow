@@ -1,6 +1,7 @@
-// use std::io::{BufRead, BufReader};
+use std::io::{ BufRead, BufReader };
+use std::error::Error;
 // use std::include_str;
-use std::io::prelude::*;
+// use std::io::prelude::*;
 use std::fmt;
 use clap::Parser;
 // use anyhow::{Context, Result};
@@ -111,14 +112,11 @@ fn hash_anagram(word:&str) -> u64 {
     // hash
 }
 
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>())
-}
-
-fn main() -> Result<()> {
+fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
     let hash_match = hash_anagram(&args.letters);
+    let mut best = HashMap::<char, u64>::new();
     let letters = Word12::new(&args.letters.to_uppercase());
     let target = CharPrime::new(&args.letters.to_uppercase());
     let filename = "WOW24.txt";
@@ -134,7 +132,19 @@ fn main() -> Result<()> {
     // }
 
     // Approach #2 - fast and simple
-    let mut best = HashMap::<char, u64>::new();
+
+    // let reader = BufReader::new(content.as_bytes());
+    let reader = BufReader::new(std::fs::File::open(filename).expect("open failed"));
+
+    let matches = reader
+        .lines()
+        .flatten()
+        .filter(|s| {target==CharPrime::new(&s)});
+
+    for item in matches {
+        println!("FILTERED: {}", item)
+    }
+
 
     // if let Ok(lines) = read_lines(filename) {
         // for line in lines.flatten() {
@@ -155,26 +165,6 @@ fn main() -> Result<()> {
     // }
     // println!("{:?}", best);
 
-    if let Ok(lines) = read_lines(filename) {
-        for line in lines.flatten() {
-            // println!("{}", line);
-            // println!("{} {}", target, CharPrime::new(&line));
-            if target == CharPrime::new(&line) {
-                println!("MATCH: {}", line);
-            }
-        }
-    }
-    // println!("{:?}", best);
-
-    // /// Approach #3 - slow and simple
-    // let content = std::fs::read_to_string(&filename)
-        // .with_context(|| format!("could not read file `{}`", filename))?;
-
-    // for line in content.lines() {
-        // if hash_match == hash_anagram(line) {
-            // println!("{}", line);
-        // }
-    // }
 
     println!("letters {:?}", args.letters);
     println!("{}", letters);
