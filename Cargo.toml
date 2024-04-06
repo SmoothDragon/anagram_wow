@@ -16,6 +16,10 @@ lazy_static = "1.4.0"
 name = "anagram"
 src = "src/bin/anagram.rs"
 
+[[bin]]
+name = "letterbank"
+src = "src/bin/letterbank.rs"
+
 # [workspace]
 # members = [
   # "lib/*",
