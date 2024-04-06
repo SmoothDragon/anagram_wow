@@ -1,5 +1,5 @@
 [package]
-name = "anagram"
+name = "anagram_wow"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,3 +9,15 @@ edition = "2021"
 clap = { version = "4.0", features = ["derive"] }
 anyhow = "1.0"
 phf = "0.11.2"
+itertools = "0.12.1"
+lazy_static = "1.4.0"
+
+[[bin]]
+name = "anagram"
+src = "src/bin/anagram.rs"
+
+# [workspace]
+# members = [
+  # "lib/*",
+  # "bin/*",
+  # ]

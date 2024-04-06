@@ -5,8 +5,9 @@ use std::error::Error;
 use std::fmt;
 use clap::Parser;
 // use anyhow::{Context, Result};
-use anyhow::{Result};
+// use anyhow::{Result};
 use std::collections::HashMap;
+use itertools::Itertools;
 
 /// Search for words that match the letters given
 #[derive(Parser)]
@@ -95,7 +96,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let letters = Word12::new(&args.letters.to_uppercase());
     let target = CharPrime::new(&args.letters.to_uppercase());
-    const WORDLIST:&str = include_str!("../share/WOW24.txt");
+    let length = &args.letters.len();
+    const WORDLIST:&str = include_str!("share/WOW24.txt");
 
     let reader = BufReader::new(WORDLIST.as_bytes());
     // let filename = "WOW24.txt";
@@ -104,11 +106,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     let matches = reader
         .lines()
         .flatten()
-        .filter(|s| {target==CharPrime::new(&s)});
+        .filter(|s| {&s.len()==length})
+        .filter(|s| {target==CharPrime::new(&s)})
+        .join("\n")
+        ;
 
-    for item in matches {
-        println!("FILTERED: {}", item)
-    }
+    println!("{}", matches);
+    // for item in matches {
+        // println!("FILTERED: {}", item)
+    // }
 
 
 
@@ -116,6 +122,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("letters {:?}", args.letters);
     println!("{}", letters);
     println!("{:?}", letters);
+    println!("Still in main");
 
     Ok(())
 }
