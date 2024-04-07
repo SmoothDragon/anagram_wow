@@ -1,5 +1,7 @@
 // TODO: Put description here for doc
 
+use bitintr::Popcnt;
+
 #[derive(Debug, PartialEq)]
 pub struct CharSet(u32);
 
@@ -12,6 +14,17 @@ impl From<&str> for CharSet {
     }
 }
 
+impl CharSet {
+    pub fn contains(&self, other: &CharSet) -> bool {
+        other.0 | self.0 == self.0
+    }
+
+    pub fn len(&self) -> usize {
+        (self.0).popcnt() as usize
+    }
+}
+
+//
 // impl Into<CharSet> for &String {
     // /// Maps A..Z to a bit in position 1..=26
     // /// The AND and SHIFT will work for all u8, even non-alphabeticals.
@@ -38,10 +51,23 @@ mod test {
     use super::CharSet;
 
     #[test]
-    fn basics() {
+    fn test_from() {
         assert_eq!(CharSet(0u32), CharSet::from(""));
         assert_eq!(CharSet(0xeu32), CharSet::from("CAB"));
         assert_eq!(CharSet(0xeu32), CharSet::from("abc"));
+    }
+
+    #[test]
+    fn test_contains() {
+        assert!(CharSet(0xfu32).contains(&CharSet(0x8u32)));
+        assert!(!CharSet(0x10u32).contains(&CharSet(0x8u32)));
+        assert!(CharSet::from("RETAIN").contains(&CharSet::from("RAIN")));
+        assert!(!CharSet::from("RAIN").contains(&CharSet::from("RETAIN")));
+    }
+
+    #[test]
+    fn test_len() {
+        assert_eq!(CharSet::from("ZESTIER").len(), 6);
     }
 }
 
