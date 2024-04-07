@@ -1,10 +1,23 @@
 use std::io::{ BufRead, BufReader };
 use std::error::Error;
 use std::fmt;
+use std::str::FromStr;
 use clap::Parser;
 use std::collections::HashMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+
+
+/* NOTEs
+ * FromStr - Many to one and not reversible
+ * TryFrom<&str> - generally one-to-one and reversible, but may fail
+ * From - intended for perfect conversions, no failure
+ * Into - Conversion is always possible
+ * TryInto - Conversion may fail
+ *
+ * Always prefer From to Into since Into is derivabel from From.
+ * */
+
 
 /// Search for words that match the letters given
 #[derive(Parser)]
@@ -22,14 +35,35 @@ lazy_static! {
 #[derive(Debug, PartialEq)]
 struct CharSet(u32);
 
-impl CharSet {
+#[derive(Debug, PartialEq, Eq)]
+struct CharSetError;
+
+impl FromStr for CharSet {
+    type Err = CharSetError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self(s.bytes().fold(0, |acc, ch| acc | (1<<(ch & 31)))))
+    }
+}
+
+impl From<&str> for CharSet {
     /// Maps A..Z to a bit in position 1..=26
     /// The AND and SHIFT will work for all u8, even non-alphabeticals.
     /// Upper and lower case letters both map to the same position.
-    pub fn new(word: &str) -> Self {
+    fn from(word: &str) -> Self {
         Self(word.bytes().fold(0, |acc, ch| acc | (1<<(ch & 31))))
     }
 }
+
+// impl Into<CharSet> for &String {
+    // /// Maps A..Z to a bit in position 1..=26
+    // /// The AND and SHIFT will work for all u8, even non-alphabeticals.
+    // /// Upper and lower case letters both map to the same position.
+    // fn into(self) -> CharSet {
+        // CharSet(self.bytes().fold(0, |acc, ch| acc | (1<<(ch & 31))))
+    // }
+// }
+
 
 #[derive(Debug, PartialEq)]
 struct CharPrime(u64);
@@ -76,20 +110,22 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
     let target = CharPrime::new(&args.letters.to_uppercase());
-    let target_set = CharSet::new(&args.letters.to_uppercase());
-    let length = &args.letters.len();
+    let target_set = CharSet::from(args.letters.to_uppercase().as_str());
+    let length = args.letters.len();
     const WORDLIST:&str = include_str!("../share/WOW24.txt");
 
     let matches = BufReader::new(WORDLIST.as_bytes())
         .lines()
         .flatten()
-        .filter(|s| {&s.len()==length})
-        .filter(|s| {target_set==CharSet::new(&s)})
+        .filter(|s| {s.len()==length})
+        .filter(|s| {target_set==CharSet::from(s.as_str())})
+        // .filter(|s| {target_set==s.as_str().into()})
+        // .filter(|s| {target_set==s.parse().expect("parse failed")})
         .filter(|s| {target==CharPrime::new(&s)})
         .join("\n")
         ;
 
     println!("{}", matches);
-
+    println!("HELLO");
     Ok(())
 }
