@@ -97,7 +97,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let letters = Word12::new(&args.letters.to_uppercase());
     let target = CharPrime::new(&args.letters.to_uppercase());
     let length = &args.letters.len();
-    const WORDLIST:&str = include_str!("share/WOW24.txt");
+    const WORDLIST:&str = include_str!("../share/WOW24.txt");
 
     let reader = BufReader::new(WORDLIST.as_bytes());
     // let filename = "WOW24.txt";

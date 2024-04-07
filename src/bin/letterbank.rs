@@ -1,22 +1,11 @@
 use std::io::{ BufRead, BufReader };
 use std::error::Error;
-use std::fmt;
-use std::str::FromStr;
 use clap::Parser;
-use std::collections::HashMap;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 
+use anagram_wow::char_set::CharSet;
+use anagram_wow::char_prime::CharPrime;
 
-/* NOTEs
- * FromStr - Many to one and not reversible
- * TryFrom<&str> - generally one-to-one and reversible, but may fail
- * From - intended for perfect conversions, no failure
- * Into - Conversion is always possible
- * TryInto - Conversion may fail
- *
- * Always prefer From to Into since Into is derivabel from From.
- * */
 
 
 /// Search for words that match the letters given
@@ -26,90 +15,12 @@ struct Cli {
     letters: String,
 }
 
-const PRIMES: [u64; 26] = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,91,97];
-
-lazy_static! {
-    static ref CONSO_PRIME: HashMap<char, u64> = "SNTRLDCGPUMHBYFZKWVXJQ".chars().zip(PRIMES).collect();
-}
-
-#[derive(Debug, PartialEq)]
-struct CharSet(u32);
-
-#[derive(Debug, PartialEq, Eq)]
-struct CharSetError;
-
-impl FromStr for CharSet {
-    type Err = CharSetError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(s.bytes().fold(0, |acc, ch| acc | (1<<(ch & 31)))))
-    }
-}
-
-impl From<&str> for CharSet {
-    /// Maps A..Z to a bit in position 1..=26
-    /// The AND and SHIFT will work for all u8, even non-alphabeticals.
-    /// Upper and lower case letters both map to the same position.
-    fn from(word: &str) -> Self {
-        Self(word.bytes().fold(0, |acc, ch| acc | (1<<(ch & 31))))
-    }
-}
-
-// impl Into<CharSet> for &String {
-    // /// Maps A..Z to a bit in position 1..=26
-    // /// The AND and SHIFT will work for all u8, even non-alphabeticals.
-    // /// Upper and lower case letters both map to the same position.
-    // fn into(self) -> CharSet {
-        // CharSet(self.bytes().fold(0, |acc, ch| acc | (1<<(ch & 31))))
-    // }
-// }
-
-
-#[derive(Debug, PartialEq)]
-struct CharPrime(u64);
-
-impl CharPrime {
-    pub fn new(word: &str) -> Self {
-        let mut conso:u64 = 1;
-        let mut vowel:u64 = 0;
-        let vowel_shift: HashMap<char, u64> = [ ('A', 1), ('E', 8), ('I', 64), ('O', 512) ].iter().cloned().collect();
-
-        for ch in word.chars() {
-            if vowel_shift.contains_key(&ch) {
-                vowel += vowel_shift[&ch];
-            } else {
-                // conso *= conso_prime[&ch];
-                conso *= CONSO_PRIME[&ch];
-            }
-        }
-        Self((conso<<12) + vowel)
-    }
-}
-
-impl fmt::Display for CharPrime {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut string = String::new();
-        let mut hash = self.0 >> 12;
-        for (key, value) in CONSO_PRIME.iter() {
-            while hash % value == 0 {
-                string.push(*key);
-                hash = hash / value;
-            }
-        }
-        let bottom = self.0 & 0xfff;
-        for (ii, ch) in "AEIO".chars().enumerate() {
-            let limit = (bottom >> (3*ii)) & 7;
-            for _ in 0..limit { string.push(ch); }
-        }
-        write!(f, "{}", string)
-    }
-}
-
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
 
-    let target = CharPrime::new(&args.letters.to_uppercase());
+    // let target = CharPrime::new(&args.letters.to_uppercase());
+    let target = CharPrime::from(args.letters.to_uppercase().as_str());
     let target_set = CharSet::from(args.letters.to_uppercase().as_str());
     let length = args.letters.len();
     const WORDLIST:&str = include_str!("../share/WOW24.txt");
@@ -121,11 +32,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         .filter(|s| {target_set==CharSet::from(s.as_str())})
         // .filter(|s| {target_set==s.as_str().into()})
         // .filter(|s| {target_set==s.parse().expect("parse failed")})
-        .filter(|s| {target==CharPrime::new(&s)})
+        .filter(|s| {target==CharPrime::from(s.as_str())})
         .join("\n")
         ;
 
     println!("{}", matches);
-    println!("HELLO");
+    println!("letterbank");
     Ok(())
 }
