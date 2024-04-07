@@ -55,8 +55,8 @@ mod test {
 
     #[test]
     fn basics() {
-        assert_eq!(CharPrime(4096u64), CharPrime::new(""));
-        assert_eq!(CharPrime::new("ANESTRI"), CharPrime::new("RETAINS"));
+        assert_eq!(CharPrime(4096u64), CharPrime::from(""));
+        assert_eq!(CharPrime::from("ANESTRI"), CharPrime::from("RETAINS"));
         // TODO: format output is random due to HashMap
         // assert_eq!(format!("{}",CharPrime::new("ANESTRI")), "RTNSAEI".to_string());
     }
