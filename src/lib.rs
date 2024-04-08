@@ -10,3 +10,4 @@
 
 pub mod char_set;
 pub mod char_prime;
+pub mod char_multiset;

@@ -21,6 +21,10 @@ src = "src/bin/anagram.rs"
 name = "letterbank"
 src = "src/bin/letterbank.rs"
 
+[[bin]]
+name = "anahook"
+src = "src/bin/anahook.rs"
+
 # [workspace]
 # members = [
   # "lib/*",
