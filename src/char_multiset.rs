@@ -1,6 +1,5 @@
 // TODO: Put description here for doc
 
-use bitintr::Popcnt;
 use std::fmt;
 use itertools::Itertools;
 
