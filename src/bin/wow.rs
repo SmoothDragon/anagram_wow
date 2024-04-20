@@ -1,6 +1,6 @@
 use std::io::{ BufRead, BufReader };
 use std::fmt::Display;
-use core::cmp::max;
+use std::cmp::max;
 use clap::*;
 use itertools::Itertools;
 
@@ -17,12 +17,24 @@ struct Args {
     letters: String,
 }
 
+#[derive(clap::ValueEnum, Clone)]
+#[allow(non_camel_case_types)]
+enum Method {
+   anagram,
+   anahook,
+   letterbank,
+   hooks,
+   define,
+}
+
+#[derive(Debug)]
 struct Query {
     required_set: CharSet,
-    // required_multiset: CharMultiSet,
+    required: CharMultiSet,
     allowed_set: CharSet,
-    // lenth_min: usize,
-    // lenth_max: usize,
+    allowed: CharMultiSet,
+    length_min: usize,
+    length_max: usize,
     blanks: usize,
 }
 
@@ -48,30 +60,32 @@ impl From<&str> for Query {
             ;
         Self{
             required_set: CharSet::from(&*required),
+            required: CharMultiSet::from(&*required),
             allowed_set: CharSet::from(&*allowed),
+            allowed: CharMultiSet::from(&*allowed),
+            length_min: required.len(),
+            length_max: allowed.len()+blanks,
             blanks: blanks,
         }
     }
 }
 
-#[derive(clap::ValueEnum, Clone)]
-#[allow(non_camel_case_types)]
-enum Method {
-   anagram,
-   anahook,
-   letterbank,
-   hooks,
-   define,
-}
+// fn anagram(letters: &str, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
+    // let target_set = CharSet::from(letters);
+    // let target = CharMultiSet::from(letters);
+    // let length = target.len();
+    // seq.into_iter()
+        // .filter(move |s| (*s.as_ref()).len()==length )
+        // .filter(move |s| CharSet::from(&*s.as_ref()).contains(target_set))
+        // .filter(move |s| CharMultiSet::from(&*s.as_ref()).contains(target))
+// }
 
-fn anagram(letters: &str, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
-    let target_set = CharSet::from(letters);
-    let target = CharMultiSet::from(letters);
-    let length = target.len();
+fn anagram(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
     seq.into_iter()
-        .filter(move |s| (*s.as_ref()).len()==length )
-        .filter(move |s| CharSet::from(&*s.as_ref()).contains(target_set))
-        .filter(move |s| CharMultiSet::from(&*s.as_ref()).contains(target))
+        .filter(move |s| (query.length_min..=query.length_max).contains(&(s.as_ref().len())))
+        // .filter(move |s| (*s.as_ref()).len() <= query.length_max )
+        .filter(move |s| query.required.contains(CharMultiSet::from(&*s.as_ref())))
+        .filter(move |s| query.allowed.contains(CharMultiSet::from(&*s.as_ref())))
 }
 
 fn anahook(letters: &str, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
@@ -122,13 +136,15 @@ fn main() {
     // let target_set = CharSet::from(&*letters);
     // let target = CharMultiSet::from(letters.as_str());
     // let length = letters.len() + blanks;
+    let query = Query::from(args.letters.as_str());
 
     let ss = match args.method {
-        Method::anagram => anagram(&letters, word_list).join("\n"),
+        Method::anagram => anagram(query, word_list).join("\n"),
         Method::anahook => anahook(&letters, word_list).join("\n"),
         Method::letterbank => letterbank(&args.letters, word_list).join("\n"),
         _ => "Undefined".to_string(),
     };
     println!("{}", ss);
+    println!("{:?}", Query::from(args.letters.as_str()));
 
 }
