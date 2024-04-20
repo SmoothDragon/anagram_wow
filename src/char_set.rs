@@ -2,7 +2,7 @@
 
 use bitintr::Popcnt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct CharSet(u32);
 
 impl From<&str> for CharSet {
@@ -15,11 +15,11 @@ impl From<&str> for CharSet {
 }
 
 impl CharSet {
-    pub fn contains(&self, other: &CharSet) -> bool {
+    pub fn contains(self, other: CharSet) -> bool {
         other.0 | self.0 == self.0
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(self) -> usize {
         (self.0).popcnt() as usize
     }
 }
@@ -59,10 +59,10 @@ mod test {
 
     #[test]
     fn test_contains() {
-        assert!(CharSet(0xfu32).contains(&CharSet(0x8u32)));
-        assert!(!CharSet(0x10u32).contains(&CharSet(0x8u32)));
-        assert!(CharSet::from("RETAIN").contains(&CharSet::from("RAIN")));
-        assert!(!CharSet::from("RAIN").contains(&CharSet::from("RETAIN")));
+        assert!(CharSet(0xfu32).contains(CharSet(0x8u32)));
+        assert!(!CharSet(0x10u32).contains(CharSet(0x8u32)));
+        assert!(CharSet::from("RETAIN").contains(CharSet::from("RAIN")));
+        assert!(!CharSet::from("RAIN").contains(CharSet::from("RETAIN")));
     }
 
     #[test]

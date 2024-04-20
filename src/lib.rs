@@ -11,3 +11,6 @@
 pub mod char_set;
 pub mod char_prime;
 pub mod char_multiset;
+
+pub use crate::char_set::CharSet;
+pub use crate::char_multiset::CharMultiSet;

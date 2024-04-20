@@ -3,7 +3,7 @@
 use std::fmt;
 use itertools::Itertools;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub struct CharMultiSet(u128);
 
 impl From<&str> for CharMultiSet {
@@ -16,11 +16,11 @@ impl From<&str> for CharMultiSet {
 }
 
 impl CharMultiSet {
-    pub fn contains(&self, other: &CharMultiSet) -> bool {
+    pub fn contains(self, other: CharMultiSet) -> bool {
         ((self.0.wrapping_sub(other.0)) & 0x8888888888888888u128) == 0
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(self) -> usize {
         let mask1 = 0xf0f0f0f0f0f0f0fu64;
         let result = (self.0 + (self.0>>64)) as u64;
         // let result = result.wrapping_mul(0x1111111111111111u64);
@@ -71,11 +71,11 @@ mod test {
 
     #[test]
     fn test_contains() {
-        assert!(CharMultiSet(0x7u128).contains(&CharMultiSet(0x1u128)));
-        assert!(CharMultiSet(0x20u128).contains(&CharMultiSet(0x10u128)));
-        assert!(!CharMultiSet(0x10u128).contains(&CharMultiSet(0x20u128)));
-        assert!(CharMultiSet::from("RETAIN").contains(&CharMultiSet::from("RAIN")));
-        assert!(!CharMultiSet::from("RAIN").contains(&CharMultiSet::from("RETAIN")));
+        assert!(CharMultiSet(0x7u128).contains(CharMultiSet(0x1u128)));
+        assert!(CharMultiSet(0x20u128).contains(CharMultiSet(0x10u128)));
+        assert!(!CharMultiSet(0x10u128).contains(CharMultiSet(0x20u128)));
+        assert!(CharMultiSet::from("RETAIN").contains(CharMultiSet::from("RAIN")));
+        assert!(!CharMultiSet::from("RAIN").contains(CharMultiSet::from("RETAIN")));
     }
 
     #[test]
