@@ -36,8 +36,8 @@ impl CharMultiSet {
 
 impl fmt::Debug for CharMultiSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = (1..=26)
-            .map(|ii| format!("{}", ((self.0 >> (ii<<2)) & 0xf)))
+        let s = ('A'..='Z').enumerate()
+            .map(|(ii, ch)| format!("{}{}", ch, ((self.0 >> ((ii+1)<<2)) & 0xf) ))
             .join(" ")
             ;
         write!(f, "{}", s)

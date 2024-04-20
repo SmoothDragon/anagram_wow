@@ -1,8 +1,10 @@
 // TODO: Put description here for doc
 
+use std::fmt;
+use itertools::Itertools;
 use bitintr::Popcnt;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy)]
 pub struct CharSet(u32);
 
 impl From<&str> for CharSet {
@@ -24,6 +26,26 @@ impl CharSet {
     }
 }
 
+impl fmt::Debug for CharSet {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = ('A'..='Z').enumerate()
+            .map(|(ii, ch)| format!("{}{}", ch, ((self.0 >> (ii+1)) & 0x1) ))
+            .join(" ")
+            ;
+        write!(f, "{}", s)
+    }
+}
+    
+impl fmt::Display for CharSet {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = (1..=26)
+            .map(|ii| format!("{}", ((self.0 >> ii) & 0x1)))
+            .join(" ")
+            ;
+        write!(f, "{}", s)
+    }
+}
+    
 //
 // impl Into<CharSet> for &String {
     // /// Maps A..Z to a bit in position 1..=26
