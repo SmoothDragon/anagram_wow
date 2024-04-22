@@ -24,6 +24,11 @@ impl CharSet {
     pub fn len(self) -> usize {
         (self.0).popcnt() as usize
     }
+
+    pub fn blanks_needed(self, other: CharSet) -> usize {
+        ((self.0 | other.0) - self.0).popcnt() as usize
+    }
+
 }
 
 impl fmt::Debug for CharSet {
@@ -71,6 +76,17 @@ impl fmt::Display for CharSet {
 #[cfg(test)]
 mod test {
     use super::CharSet;
+    use lazy_static::lazy_static;
+
+    lazy_static! {
+        static ref BAN: CharSet = CharSet::from("BAN");
+        static ref BANG: CharSet = CharSet::from("BANG");
+        static ref BANANA: CharSet = CharSet::from("BANANA");
+        static ref BARN: CharSet = CharSet::from("BARN");
+        static ref RAIN: CharSet = CharSet::from("RAIN");
+        static ref RETAIN: CharSet = CharSet::from("RETAIN");
+        static ref ZESTIER: CharSet = CharSet::from("ZESTIER");
+    }
 
     #[test]
     fn test_from() {
@@ -83,13 +99,21 @@ mod test {
     fn test_contains() {
         assert!(CharSet(0xfu32).contains(CharSet(0x8u32)));
         assert!(!CharSet(0x10u32).contains(CharSet(0x8u32)));
-        assert!(CharSet::from("RETAIN").contains(CharSet::from("RAIN")));
-        assert!(!CharSet::from("RAIN").contains(CharSet::from("RETAIN")));
+        assert!(RETAIN.contains(*RAIN));
+        assert!(!RAIN.contains(*RETAIN));
+        assert!(!BANANA.contains(*BARN));
     }
 
     #[test]
     fn test_len() {
-        assert_eq!(CharSet::from("ZESTIER").len(), 6);
+        assert_eq!(ZESTIER.len(), 6);
     }
+
+    #[test]
+    fn test_blanks_needed() {
+        assert_eq!(RETAIN.blanks_needed(*RAIN), 0);
+        assert_eq!(RAIN.blanks_needed(*RETAIN), 2);
+    }
+
 }
 
