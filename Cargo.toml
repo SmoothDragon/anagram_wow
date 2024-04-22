@@ -14,16 +14,9 @@ lazy_static = "1.4.0"
 bitintr = "0.3.0"
 
 [[bin]]
-name = "anagram"
-src = "src/bin/anagram.rs"
+name = "wow"
+src = "src/bin/wow.rs"
 
-[[bin]]
-name = "letterbank"
-src = "src/bin/letterbank.rs"
-
-[[bin]]
-name = "anahook"
-src = "src/bin/anahook.rs"
 
 # [workspace]
 # members = [
