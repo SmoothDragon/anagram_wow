@@ -33,21 +33,22 @@ impl CharSet {
 
 impl fmt::Debug for CharSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = ('A'..='Z').enumerate()
+        write!(f, "{:#034b} => {}", self.0,
+            ('A'..='Z').enumerate()
             .map(|(ii, ch)| format!("{}{}", ch, ((self.0 >> (ii+1)) & 0x1) ))
             .join(" ")
-            ;
-        write!(f, "{}", s)
+        )
     }
 }
     
 impl fmt::Display for CharSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = (1..=26)
-            .map(|ii| format!("{}", ((self.0 >> ii) & 0x1)))
-            .join(" ")
-            ;
-        write!(f, "{}", s)
+        write!(f, "{}",
+            (1..=26u8)
+            .filter(|ii| (self.0 >> ii) & 1 == 1)
+            .map(|ii| format!("{}", (64+ii) as char))
+            .join("")
+        )
     }
 }
     

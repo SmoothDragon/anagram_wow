@@ -1,10 +1,12 @@
 // TODO: Put description here for doc
 
 use std::fmt;
+use std::cmp::Ordering;
+use std::iter::repeat;
 use std::ops::Sub;
 use itertools::Itertools;
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct CharMultiSet(u128);
 
 impl From<&str> for CharMultiSet {
@@ -30,6 +32,7 @@ impl Sub for CharMultiSet {
         }
     }
 }
+
 
 impl CharMultiSet {
     const REP8:u128 = 0x88888888888888888888888888888888u128;
@@ -70,23 +73,28 @@ impl CharMultiSet {
     }
 }
 
-impl fmt::Debug for CharMultiSet {
+impl fmt::Display for CharMultiSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = ('A'..='Z').enumerate()
-            .map(|(ii, ch)| format!("{}{}", ch, ((self.0 >> ((ii+1)<<2)) & 0xf) ))
-            .join(" ")
-            ;
-        write!(f, "{}\n{:#034x}", s, self.0)
+        write!(f, "{}",
+            ('A'..='Z').enumerate()
+            .map(|(ii, ch)| format!("{}", 
+                repeat(ch).
+                take(((self.0 >> ((ii+1)<<2)) & 0xf) as usize)
+                .collect::<String>())
+                )
+            .join("")
+        )
     }
 }
     
-impl fmt::Display for CharMultiSet {
+impl fmt::Debug for CharMultiSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = (1..=26)
-            .map(|ii| format!("{}", ((self.0 >> (ii<<2)) & 0xf)))
+        write!(f, "{:#034x} => {}", self.0,
+            ('A'..='Z').enumerate()
+            // .map(|ii| format!("{}", ((self.0 >> (ii<<2)) & 0xf)))
+            .map(|(ii, ch)| format!("{}{}", ch, ((self.0 >> ((ii+1)<<2)) & 0xf) ))
             .join(" ")
-            ;
-        write!(f, "{}", s)
+        )
     }
 }
     

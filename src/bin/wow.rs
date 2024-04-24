@@ -2,6 +2,7 @@ use std::io::{ BufRead, BufReader };
 use std::fmt::Display;
 use clap::*;
 use itertools::Itertools;
+use std::collections::{BTreeMap, HashMap};
 
 use anagram_wow::{CharSet, CharMultiSet, Query};
 
@@ -50,6 +51,12 @@ fn letterbank(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>
         .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(&*s.as_ref())) <= query.blanks)
 }
 
+fn wordmap(seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> BTreeMap<CharMultiSet, CharSet> {
+    seq.into_iter()
+        .filter(move |s| 3 == s.as_ref().len())
+        .map(move |s| (CharMultiSet::from(&*s.as_ref()), CharSet::from(&*s.as_ref())) )
+        .collect::<BTreeMap<CharMultiSet, CharSet>>()
+}
 
 fn main() {
     let args = Args::parse();
@@ -57,12 +64,18 @@ fn main() {
     let word_list = BufReader::new(WORDLIST.as_bytes()).lines().flatten();
     let query = Query::from(args.letters.as_str());
 
-    let ss = match args.method {
-        Method::anagram => anagram(query, word_list).join("\n"),
-        Method::anahook => anahook(query, word_list).join("\n"),
-        Method::letterbank => letterbank(query, word_list).join("\n"),
-        _ => "Undefined".to_string(),
-    };
+    let wm =  wordmap(word_list);
+    // let keys: Vec<CharMultiSet> = wm.into_keys().collect();
+    println!("{:?}", wm);
+    // for (key, value) in wm.into_iter() {
+        // println!("{}:{}", key, value);
+    // }
+    // let ss = match args.method {
+        // Method::anagram => anagram(query, word_list).join("\n"),
+        // Method::anahook => anahook(query, word_list).join("\n"),
+        // Method::letterbank => letterbank(query, word_list).join("\n"),
+        // _ => "Undefined".to_string(),
+    // };
 
-    println!("{}", ss);
+    // println!("{}", ss);
 }
