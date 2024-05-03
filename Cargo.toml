@@ -8,10 +8,15 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 anyhow = "1.0"
-phf = "0.11.2"
 itertools = "0.12.1"
 lazy_static = "1.4.0"
 bitintr = "0.3.0"
+fasthash = "0.4.0"
+phf_macros = "0.11.2"
+
+[build-dependencies]
+phf = { version = "0.11.2", default-features = false }
+phf_codegen = "0.11.1"
 
 [[bin]]
 name = "wow"
