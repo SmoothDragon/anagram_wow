@@ -25,6 +25,7 @@ enum Method {
    letterbank,
    hooks,
    define,
+   boxed,
 }
 
 fn anagram(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
@@ -51,16 +52,40 @@ fn letterbank(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>
         .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(&*s.as_ref())) <= query.blanks)
 }
 
+fn boxed_adjacent(letters: &str, word: &str) -> bool {
+    let mut last_pos = usize::MAX;
+    let letters = letters.to_uppercase();
+    for ch in word.to_uppercase().chars() {
+        let pos = letters.find(ch).unwrap() / 3;
+        // println!("letters: {}, word: {}, ch: {}, pos: {}", letters, word, ch, pos);
+        if pos == last_pos { return false };
+        last_pos = pos;
+    }
+    true
+}
+
+
+fn boxed(letters: String, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
+    let query = Query::from(&*letters);
+    seq.into_iter()
+        .filter(move |s| CharSet::from(&*s.as_ref()).contains(query.required_set))
+        .filter(move |s| query.blanks!=0 || query.allowed_set.contains(CharSet::from(&*s.as_ref()))) 
+        .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(&*s.as_ref())) <= query.blanks)
+        .filter(move |s| boxed_adjacent(&*letters, &*s.as_ref()))
+}
+
 fn main() {
     let args = Args::parse();
 
+    let letters = args.letters.to_string();
     let word_list = BufReader::new(WORDLIST.as_bytes()).lines().flatten();
-    let query = Query::from(args.letters.as_str());
+    let query = Query::from(&*letters);
 
     let ss = match args.method {
         Method::anagram => anagram(query, word_list).join("\n"),
         Method::anahook => anahook(query, word_list).join("\n"),
         Method::letterbank => letterbank(query, word_list).join("\n"),
+        Method::boxed => boxed(letters, word_list).join("\n"),
         _ => "Undefined".to_string(),
     };
 
