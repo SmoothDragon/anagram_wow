@@ -3,7 +3,6 @@ use std::fmt;
 use std::iter::repeat;
 use std::ops::Sub;
 use itertools::Itertools;
-use bitintr::Popcnt;
 
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -132,11 +131,11 @@ impl CharSet {
     }
 
     pub fn len(self) -> usize {
-        (self.0).popcnt() as usize
+        (self.0).count_ones() as usize
     }
 
     pub fn blanks_needed(self, other: CharSet) -> usize {
-        ((self.0 | other.0) - self.0).popcnt() as usize
+        ((self.0 | other.0) - self.0).count_ones() as usize
     }
 
 }
