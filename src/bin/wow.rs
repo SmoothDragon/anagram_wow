@@ -2,7 +2,7 @@ use std::io::{ BufRead, BufReader };
 use std::fmt::Display;
 use clap::*;
 use itertools::Itertools;
-use std::collections::{BTreeMap, HashMap};
+// use std::collections::{BTreeMap, HashMap};
 
 use anagram_wow::{CharSet, CharMultiSet, Query};
 

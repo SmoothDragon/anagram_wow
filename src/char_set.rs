@@ -25,9 +25,9 @@ impl Sub for CharMultiSet {
     fn sub(self, other: Self) -> Self::Output {
         let result = self.0.wrapping_sub(other.0);
         if result & Self::REP8 == 0 {
-            return Some(Self(result))
+            Some(Self(result))
         } else {
-            return None
+            None
         }
     }
 }
@@ -69,16 +69,20 @@ impl CharMultiSet {
         let result = (result >> 32) + result;
         (result & 0xff) as usize
     }
+
+    pub fn is_empty(self) -> bool {
+        self.0 == 0
+    }
 }
 
 impl fmt::Display for CharMultiSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}",
             ('A'..='Z').enumerate()
-            .map(|(ii, ch)| format!("{}", 
-                repeat(ch).
-                take(((self.0 >> ((ii+1)<<2)) & 0xf) as usize)
-                .collect::<String>())
+            .map(|(ii, ch)| repeat(ch)
+                .take(((self.0 >> ((ii+1)<<2)) & 0xf) as usize)
+                .collect::<String>()
+                .to_string()
                 )
             .join("")
         )
@@ -132,6 +136,10 @@ impl CharSet {
 
     pub fn len(self) -> usize {
         (self.0).count_ones() as usize
+    }
+
+    pub fn is_empty(self) -> bool {
+        self.0 == 0
     }
 
     pub fn blanks_needed(self, other: CharSet) -> usize {

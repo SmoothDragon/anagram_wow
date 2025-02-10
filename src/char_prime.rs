@@ -37,7 +37,7 @@ impl fmt::Display for CharPrime {
         for (key, value) in CONSO_PRIME.iter() {
             while hash % value == 0 {
                 string.push(*key);
-                hash = hash / value;
+                hash /= value;
             }
         }
         let bottom = self.0 & 0xfff;

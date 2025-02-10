@@ -40,7 +40,7 @@ impl From<&str> for Query {
             allowed: CharMultiSet::from(&*allowed),
             length_min: required.len(),
             length_max: allowed.len()+blanks,
-            blanks: blanks,
+            blanks,
         }
     }
 }
