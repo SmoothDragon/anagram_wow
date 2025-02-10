@@ -31,25 +31,25 @@ enum Method {
 fn anagram(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
     seq.into_iter()
         .filter(move |s| (query.length_min..=query.length_max).contains(&(s.as_ref().len())))
-        .filter(move |s| CharSet::from(&*s.as_ref()).contains(query.required_set))
-        .filter(move |s| CharMultiSet::from(&*s.as_ref()).contains(query.required))
-        .filter(move |s| query.allowed.blanks_needed(CharMultiSet::from(&*s.as_ref())) <= query.blanks)
+        .filter(move |s| CharSet::from(s.as_ref()).contains(query.required_set))
+        .filter(move |s| CharMultiSet::from(s.as_ref()).contains(query.required))
+        .filter(move |s| query.allowed.blanks_needed(CharMultiSet::from(s.as_ref())) <= query.blanks)
 }
 
 fn anahook(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
     seq.into_iter()
         .filter(move |s| query.length_max+1 == (s.as_ref().len()))
-        .filter(move |s| CharSet::from(&*s.as_ref()).contains(query.allowed_set))
-        .filter(move |s| CharMultiSet::from(&*s.as_ref()).contains(query.allowed))
-        .filter(move |s| query.allowed.blanks_needed(CharMultiSet::from(&*s.as_ref())) == 1+query.blanks)
+        .filter(move |s| CharSet::from(s.as_ref()).contains(query.allowed_set))
+        .filter(move |s| CharMultiSet::from(s.as_ref()).contains(query.allowed))
+        .filter(move |s| query.allowed.blanks_needed(CharMultiSet::from(s.as_ref())) == 1+query.blanks)
 }
 
 fn letterbank(query: Query, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
     seq.into_iter()
         .filter(move |s| query.length_min <= s.as_ref().len())
-        .filter(move |s| CharSet::from(&*s.as_ref()).contains(query.required_set))
-        .filter(move |s| query.blanks!=0 || query.allowed_set.contains(CharSet::from(&*s.as_ref()))) 
-        .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(&*s.as_ref())) <= query.blanks)
+        .filter(move |s| CharSet::from(s.as_ref()).contains(query.required_set))
+        .filter(move |s| query.blanks!=0 || query.allowed_set.contains(CharSet::from(s.as_ref()))) 
+        .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(s.as_ref())) <= query.blanks)
 }
 
 fn boxed_adjacent(letters: &str, word: &str) -> bool {
@@ -68,17 +68,17 @@ fn boxed_adjacent(letters: &str, word: &str) -> bool {
 fn boxed(letters: String, seq: impl IntoIterator<Item=impl AsRef<str>+Display>) -> impl Iterator<Item=impl AsRef<str>+Display> {
     let query = Query::from(&*letters);
     seq.into_iter()
-        .filter(move |s| CharSet::from(&*s.as_ref()).contains(query.required_set))
-        .filter(move |s| query.blanks!=0 || query.allowed_set.contains(CharSet::from(&*s.as_ref()))) 
-        .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(&*s.as_ref())) <= query.blanks)
-        .filter(move |s| boxed_adjacent(&*letters, &*s.as_ref()))
+        .filter(move |s| CharSet::from(s.as_ref()).contains(query.required_set))
+        .filter(move |s| query.blanks!=0 || query.allowed_set.contains(CharSet::from(s.as_ref()))) 
+        .filter(move |s| query.blanks==0 || query.allowed_set.blanks_needed(CharSet::from(s.as_ref())) <= query.blanks)
+        .filter(move |s| boxed_adjacent(&letters, s.as_ref()))
 }
 
 fn main() {
     let args = Args::parse();
 
     let letters = args.letters.to_string();
-    let word_list = BufReader::new(WORDLIST.as_bytes()).lines().flatten();
+    let word_list = BufReader::new(WORDLIST.as_bytes()).lines().map_while(Result::ok);
     let query = Query::from(&*letters);
 
     let ss = match args.method {
