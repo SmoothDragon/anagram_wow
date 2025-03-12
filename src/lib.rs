@@ -5,7 +5,7 @@
  * Into - Conversion is always possible
  * TryInto - Conversion may fail
  *
- * Always prefer From to Into since Into is derivabel from From.
+ * Always prefer From to Into since Into is derivable from From.
  * */
 
 pub mod char_set;
